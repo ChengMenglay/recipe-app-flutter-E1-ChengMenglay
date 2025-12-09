@@ -37,11 +37,48 @@ class ApiService {
     final url = Uri.parse("$baseUrl/meals?category=$category");
 
     final response = await http.get(url, headers: {'X-DB-Name': dbName});
-    if(response.statusCode == 200){
+    if (response.statusCode == 200) {
       final List<dynamic> jsonList = json.decode(response.body);
-      return jsonList.map((json)=>Meal.fromJson(json)).toList();
+      return jsonList.map((json) => Meal.fromJson(json)).toList();
     } else {
       throw Exception('Failed to load meals by category');
+    }
+  }
+
+  Future<List<Meal>> fetchMealsPaginated({
+    int page = 1,
+    int limit = 10,
+    String? sortBy,
+    String? order,
+    String? category,
+  }) async {
+    final queryParams = <String, String>{
+      '_page': page.toString(),
+      '_limit': limit.toString(),
+    };
+
+    if (sortBy != null && sortBy.isNotEmpty) {
+      queryParams['_sort'] = sortBy;
+    }
+
+    if (order != null && order.isNotEmpty) {
+      queryParams['_order'] = order;
+    }
+
+    if (category != null && category.isNotEmpty && category != 'All') {
+      queryParams['category'] = category;
+    }
+
+    final uri = Uri.parse(
+      '$baseUrl/meals',
+    ).replace(queryParameters: queryParams);
+    final response = await http.get(uri, headers: {'X-DB-Name': dbName});
+
+    if (response.statusCode == 200) {
+      final List<dynamic> jsonList = json.decode(response.body);
+      return jsonList.map((json) => Meal.fromJson(json)).toList();
+    } else {
+      throw Exception('Failed to load meals');
     }
   }
 }

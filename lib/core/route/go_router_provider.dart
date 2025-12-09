@@ -40,7 +40,7 @@ final goRouterProvider = Provider<GoRouter>((ref) {
           ),
         ],
       ),
-      GoRoute(
+      GoRoute( 
         path: '/meal-details',
         name: mealDetailRoute,
         builder: (context, state) => const MealDetailScreen(),

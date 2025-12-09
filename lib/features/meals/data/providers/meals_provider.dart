@@ -19,6 +19,32 @@ final popularMealsProvider = FutureProvider<List<Meal>>((ref) async {
 
 final selectedMealIdProvider = StateProvider<String>((ref) => "");
 final selectedCategoryProvider = StateProvider<String>((ref) => "All");
+
+// Pagination and sorting providers
+final currentPageProvider = StateProvider<int>((ref) => 1);
+final itemsPerPageProvider = StateProvider<int>((ref) => 10);
+final sortFieldProvider = StateProvider<String?>((ref) => null);
+final sortOrderProvider = StateProvider<String>(
+  (ref) => 'asc',
+); // 'asc' or 'desc'
+
+// Paginated meals provider
+final paginatedMealsProvider = FutureProvider<List<Meal>>((ref) async {
+  final api = ref.watch(apiServiceProvider);
+  final page = ref.watch(currentPageProvider);
+  final limit = ref.watch(itemsPerPageProvider);
+  final sortField = ref.watch(sortFieldProvider);
+  final sortOrder = ref.watch(sortOrderProvider);
+  final category = ref.watch(selectedCategoryProvider);
+
+  return await api.fetchMealsPaginated(
+    page: page,
+    limit: limit,
+    sortBy: sortField,
+    order: sortOrder,
+    category: category,
+  );
+});
 final mealDetailsProvider = FutureProvider<Meal>((ref) async {
   final api = ref.watch(apiServiceProvider);
   final String mealId = ref.watch(selectedMealIdProvider);

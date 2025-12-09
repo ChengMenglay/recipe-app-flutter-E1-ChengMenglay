@@ -10,6 +10,10 @@ class Ingredient {
       measure: json['measure'] ?? '',
     );
   }
+
+  Map<String, dynamic> toJson() {
+    return {'ingredient': ingredient, 'measure': measure};
+  }
 }
 
 class Meal {
@@ -52,5 +56,20 @@ class Meal {
           .map((item) => Ingredient.fromJson(item))
           .toList(),
     );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'id': id,
+      'meal': meal,
+      'category': category,
+      'area': area,
+      'instructions': instructions,
+      'mealThumb': mealThumb,
+      'tags': tags,
+      'youtube': youtube,
+      'categoryId': categoryId,
+      'ingredients': ingredients.map((ing) => ing.toJson()).toList(),
+    };
   }
 }
