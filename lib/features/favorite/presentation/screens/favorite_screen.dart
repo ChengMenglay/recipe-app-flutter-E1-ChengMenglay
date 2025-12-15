@@ -10,6 +10,8 @@ class FavoriteScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final box = Hive.box('favorites');
+
     return Scaffold(
       appBar: AppBar(
         title: const Text(
@@ -18,9 +20,44 @@ class FavoriteScreen extends StatelessWidget {
         ),
         centerTitle: true,
         elevation: 0,
+        actions: [
+          if (box.isNotEmpty)
+            IconButton(
+              icon: const Icon(Icons.delete_sweep),
+              tooltip: 'Clear All',
+              onPressed: () async {
+                final confirmed = await showDialog<bool>(
+                  context: context,
+                  builder: (context) => AlertDialog(
+                    title: const Text('Clear All Favorites?'),
+                    content: const Text(
+                      'This will remove all meals from your favorites. This action cannot be undone.',
+                    ),
+                    actions: [
+                      TextButton(
+                        onPressed: () => Navigator.pop(context, false),
+                        child: const Text('Cancel'),
+                      ),
+                      FilledButton(
+                        onPressed: () => Navigator.pop(context, true),
+                        style: FilledButton.styleFrom(
+                          backgroundColor: Colors.red,
+                        ),
+                        child: const Text('Clear All'),
+                      ),
+                    ],
+                  ),
+                );
+
+                if (confirmed == true) {
+                  await box.clear();
+                }
+              },
+            ),
+        ],
       ),
       body: ValueListenableBuilder(
-        valueListenable: Hive.box('favorites').listenable(),
+        valueListenable: box.listenable(),
         builder: (context, box, _) {
           if (box.isEmpty) {
             return Center(
@@ -99,10 +136,10 @@ class FavoriteScreen extends StatelessWidget {
                   ),
                   itemCount: favorites.length,
                   itemBuilder: (context, index) {
-                    final mealData = favorites[index] as Map<dynamic, dynamic>;
-                    final meal = Meal.fromJson(
-                      Map<String, dynamic>.from(mealData),
+                    final mealData = Map<String, dynamic>.from(
+                      favorites[index],
                     );
+                    final meal = Meal.fromJson(mealData);
                     return _FavoriteMealCard(meal: meal);
                   },
                 ),
@@ -245,29 +282,31 @@ class _FavoriteMealCard extends ConsumerWidget {
                         ),
                       ],
                     ),
-                    const SizedBox(height: 4),
-                    Row(
-                      children: [
-                        Icon(
-                          Icons.location_on,
-                          size: 14,
-                          color: Colors.green.shade600,
-                        ),
-                        const SizedBox(width: 4),
-                        Expanded(
-                          child: Text(
-                            meal.area,
-                            maxLines: 1,
-                            overflow: TextOverflow.ellipsis,
-                            style: TextStyle(
-                              fontSize: 12,
-                              color: Colors.grey.shade600,
-                              fontWeight: FontWeight.w500,
+                    if (meal.area.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Row(
+                        children: [
+                          Icon(
+                            Icons.location_on,
+                            size: 14,
+                            color: Colors.green.shade600,
+                          ),
+                          const SizedBox(width: 4),
+                          Expanded(
+                            child: Text(
+                              meal.area,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                              style: TextStyle(
+                                fontSize: 12,
+                                color: Colors.grey.shade600,
+                                fontWeight: FontWeight.w500,
+                              ),
                             ),
                           ),
-                        ),
-                      ],
-                    ),
+                        ],
+                      ),
+                    ],
                   ],
                 ),
               ),

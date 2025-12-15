@@ -21,7 +21,11 @@ class PopularMealsWidget extends ConsumerWidget {
             itemBuilder: (context, index) {
               return Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 8),
-                child: MealCard(meal: meals[index]),
+                child: SizedBox(
+                  width: 180,
+                  height: 260,
+                  child: MealCard(meal: meals[index]),
+                ),
               );
             },
           ),
